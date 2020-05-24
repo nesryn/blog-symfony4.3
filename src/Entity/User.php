@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
@@ -21,6 +22,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * )
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity("username")
+ * @UniqueEntity("email")
  */
 class User implements UserInterface
 {
@@ -51,6 +54,16 @@ class User implements UserInterface
     private $password;
 
     /**
+     * @Assert\NotBlank()
+     * @Assert\Expression(
+     *     "this.getPassword()=== this.getRetypePassword()",
+     *     message="password did not match"
+     *
+     * )
+     */
+    private $retypePassword;
+
+    /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"read"})
      * @Assert\NotBlank()
@@ -67,7 +80,7 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="author", orphanRemoval=true)
-     *@Groups({"read"})
+     * @Groups({"read"})
      */
     private $comments;
 
@@ -239,4 +252,18 @@ class User implements UserInterface
     {
         // TODO: Implement eraseCredentials() method.
     }
+
+
+    public function getRetypePassword()
+    {
+        return $this->retypePassword;
+    }
+
+
+    public function setRetypePassword($retypePassword)
+    {
+        $this->retypePassword = $retypePassword;
+    }
+
+
 }
