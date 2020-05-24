@@ -36,11 +36,17 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255)
      * @Groups({"read"})
      * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=255)
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Regex(
+     *     pattern="/(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}/",
+     *     message="password must be 7 characters "
+     * )
      */
     private $password;
 
@@ -48,13 +54,14 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255)
      * @Groups({"read"})
      * @Assert\NotBlank()
-     * @Assert\Length(min=6, max=255)
+     * @Assert\Length(min=3, max=255)
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private $email;
 
