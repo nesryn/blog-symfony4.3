@@ -15,11 +15,26 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource(
- *     itemOperations={"get"},
- *     collectionOperations={"post","get"},
- *     normalizationContext={
- *     "groups"={"read"}
- *     }
+ *     itemOperations={"get"={
+ *                          "access_control"="is_granted('IS_AUTHENTICATED_FULLY')",
+ *                          "normalization_context"={
+ *                           "groups"={"get"}
+ *                               }
+ *                          },
+ *                  "put"={
+ *                            "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+ *                           "denormalization_context"={
+ *                            "groups"={"put"}},
+ *                            "normalization_context"={
+ *                            "groups"={"get"}}
+ *                   } },
+ *     collectionOperations={ "post"={
+ *             "denormalization_context"={
+ *                 "groups"={"post"}
+ *             },
+ *             "normalization_context"={
+ *                 "groups"={"get"}},"get"}},
+ *
  * )
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @UniqueEntity("username")
@@ -31,13 +46,13 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"read"})
+     * @Groups({"get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"read"})
+     * @Groups({"get","post"})
      * @Assert\NotBlank()
      * @Assert\Length(min=3, max=255)
      */
@@ -45,6 +60,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     *  @Groups({"put","post"})
      * @Assert\NotBlank()
      * @Assert\Regex(
      *     pattern="/(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}/",
@@ -54,6 +70,7 @@ class User implements UserInterface
     private $password;
 
     /**
+     * @Groups({"put","post"})
      * @Assert\NotBlank()
      * @Assert\Expression(
      *     "this.getPassword()=== this.getRetypePassword()",
@@ -65,7 +82,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"read"})
+     * @Groups({"get","post","put"})
      * @Assert\NotBlank()
      * @Assert\Length(min=3, max=255)
      */
@@ -73,6 +90,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"put","post"})
      * @Assert\NotBlank()
      * @Assert\Email()
      */
@@ -80,13 +98,13 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="author", orphanRemoval=true)
-     * @Groups({"read"})
+     * @Groups({"get"})
      */
     private $comments;
 
     /**
      * @ORM\OneToMany(targetEntity=BlogPost::class, mappedBy="author", orphanRemoval=true)
-     * @Groups({"read"})
+     * @Groups({"get"})
      */
     private $posts;
 

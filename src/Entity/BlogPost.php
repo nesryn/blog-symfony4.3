@@ -6,13 +6,20 @@ use App\Repository\BlogPostRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource(
- *      itemOperations={"get"},
- *     collectionOperations={"get"}
+ *      itemOperations={"get",
+ *                      "put"={
+ *                                   "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user"}
+ *     },
+ *     collectionOperations={"get",
+ *                          "post"={
+ *                                   "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"}}
  * )
  * @ORM\Entity(repositoryClass=BlogPostRepository::class)
 
@@ -28,16 +35,20 @@ class BlogPost
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $title;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Assert\NotBlank()
+     * @Assert\DateTime()
      */
     private $published;
 
     /**
      * @ORM\Column(type="string")
+     * @Assert\NotBlank()
      */
     private $content;
 
@@ -45,6 +56,7 @@ class BlogPost
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank()
      */
     private $slug;
 
