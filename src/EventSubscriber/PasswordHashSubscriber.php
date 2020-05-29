@@ -7,7 +7,6 @@ use App\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
-use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -33,7 +32,7 @@ class PasswordHashSubscriber implements EventSubscriberInterface
         $user= $event->getControllerResult();
         $method=$event->getRequest()->getMethod();
 
-        if(!$user instanceof User || Request::METHOD_POST!== $method){
+        if(!$user instanceof User || !in_array($method,[Request::METHOD_PUT, Request::METHOD_POST]) ){
             return;
         }
 
