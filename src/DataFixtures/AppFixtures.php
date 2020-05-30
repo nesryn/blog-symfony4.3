@@ -20,6 +20,57 @@ class AppFixtures extends Fixture
      * @var \Faker\Factory
      */
     private $faker;
+
+    private const USERS = [
+        [
+            'username' => 'admin',
+            'email' => 'admin@blog.com',
+            'name' => 'Piotr Jura',
+            'password' => 'secret123#',
+            'enabled' => true
+        ],
+        [
+            'username' => 'john_doe',
+            'email' => 'john@blog.com',
+            'name' => 'John Doe',
+            'password' => 'secret123#',
+
+            'enabled' => true
+        ],
+        [
+            'username' => 'rob_smith',
+            'email' => 'rob@blog.com',
+            'name' => 'Rob Smith',
+            'password' => 'secret123#',
+
+            'enabled' => true
+        ],
+        [
+            'username' => 'jenny_rowling',
+            'email' => 'jenny@blog.com',
+            'name' => 'Jenny Rowling',
+            'password' => 'secret123#',
+
+            'enabled' => true
+        ],
+        [
+            'username' => 'han_solo',
+            'email' => 'han@blog.com',
+            'name' => 'Han Solo',
+            'password' => 'secret123#',
+
+            'enabled' => false
+        ],
+        [
+            'username' => 'jedi_knight',
+            'email' => 'jedi@blog.com',
+            'name' => 'Jedi Knight',
+            'password' => 'secret123#',
+
+            'enabled' => true
+        ],
+    ];
+
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->passwordEncoder= $passwordEncoder;
@@ -48,8 +99,9 @@ class AppFixtures extends Fixture
             $blogPost->setTitle($this->faker->realText(30))
                 ->setPublished(new \DateTime('now'))
                 ->setContent($this->faker->realText())
-                ->setSlug($this->faker->slug)
-                ->setAuthor($this->getReference("user_admin_$randrefUser"));
+                ->setSlug($this->faker->slug);
+            $authorRef=$this->getRandomUserReference();
+            $blogPost->setAuthor($authorRef);
             $this->setReference("blog_post_$i",$blogPost);
             $manager->persist($blogPost);
         }
@@ -62,13 +114,15 @@ class AppFixtures extends Fixture
         for ($i=0; $i<=50 ; $i++)
         {
             for ($j=0; $j< rand(1,3); $j++){
+
                 $randrefUser = rand(0,25);
                 $comment= new Comment();
                 $comment
                     ->setContent($this->faker->realText())
                     ->setPublished($this->faker->dateTimeThisYear)
-                    ->setBlogPost($this->getReference("blog_post_$i"))
-                    ->setAuthor($this->getReference("user_admin_$randrefUser"));
+                    ->setBlogPost($this->getReference("blog_post_$i"));
+                $authorRef=$this->getRandomUserReference();
+                $comment->setAuthor($authorRef);
                 $manager->persist($comment);
             }
 
@@ -79,21 +133,31 @@ class AppFixtures extends Fixture
 
     public function loadUsers(ObjectManager $manager)
     {
-      for ($i=0; $i<= 25 ;$i++)
-      {
-          $user =new User();
-          $user->setUsername($this->faker->realText(10))
-              ->setName($this->faker->realText(15))
-              ->setEmail($this->faker->email)
-              ->setPassword($this->passwordEncoder->encodePassword(
-                  $user,'admin')
-              )
-          ;
-          $this->addReference("user_admin_$i",$user);
+        foreach (self::USERS as $userFixture) {
+            $user = new User();
+            $user->setUsername($userFixture['username']);
+            $user->setEmail($userFixture['email']);
+            $user->setName($userFixture['name']);
+
+            $user->setPassword(
+                $this->passwordEncoder->encodePassword(
+                    $user,
+                    $userFixture['password']
+                )
+            );
+        $this->addReference('user_'.$userFixture['username'], $user);
           $manager->persist($user);
       }
 
         $manager->flush();
     }
 
-}
+    protected function getRandomUserReference(): User
+    {
+        return $this->getReference('user_'. self::USERS[rand(0, 3)]['username']);
+
+
+        }
+
+
+    }
