@@ -18,27 +18,33 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     itemOperations={"get"={
  *                          "access_control"="is_granted('IS_AUTHENTICATED_FULLY')",
  *                          "normalization_context"={
- *                           "groups"={"get"}
+ *                            "groups"={"get"}
  *                               }
  *                          },
  *                  "put"={
- *                            "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
- *                           "denormalization_context"={
+ *                        "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+ *                        "denormalization_context"={
  *                            "groups"={"put"}},
- *                            "normalization_context"={
+ *                        "normalization_context"={
  *                            "groups"={"get"}}
- *                   } },
- *     collectionOperations={ "post"={
+ *                   }
+ *      },
+ *
+ *     collectionOperations={
+ *       "post"={
  *             "denormalization_context"={
  *                 "groups"={"post"}
  *             },
  *             "normalization_context"={
- *                 "groups"={"get"}},"get"}},
+ *                 "groups"={"get"}
+ *              }
+ *        }
+ *     },
  *
  * )
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @UniqueEntity("username")
- * @UniqueEntity("email")
+ * @UniqueEntity("username", groups={"post"})
+ * @UniqueEntity("email",  groups={"post"})
  */
 class User implements UserInterface
 {
@@ -52,7 +58,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get","post"})
+     * @Groups({"get","post","get-comments-with-author","get-blog-post-with-author"})
      * @Assert\NotBlank()
      * @Assert\Length(min=3, max=255)
      */

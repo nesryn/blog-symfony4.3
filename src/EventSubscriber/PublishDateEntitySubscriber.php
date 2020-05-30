@@ -2,16 +2,18 @@
 /**
  * Created by PhpStorm.
  * User: nesri
- * Date: 26/05/2020
- * Time: 23:25
+ * Date: 29/05/2020
+ * Time: 07:01
  */
 
 namespace App\EventSubscriber;
+
 
 use ApiPlatform\Core\EventListener\EventPriorities;
 use App\Entity\AuthoredEntityInterface;
 use App\Entity\BlogPost;
 use App\Entity\Comment;
+use App\Entity\PublishedDateEntityInterface;
 use App\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,41 +22,31 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class AuthoredEntitySubscriber implements EventSubscriberInterface
+class PublishDateEntitySubscriber implements EventSubscriberInterface
 {
-
-    private $storage;
-    public function __construct(TokenStorageInterface $storage)
-    {
-        $this->storage= $storage;
-    }
 
     public static function getSubscribedEvents()
     {
         return [
-          KernelEvents::VIEW => ['getAuthUser' , EventPriorities::PRE_WRITE]
+            KernelEvents::VIEW => ['setDataPublished' , EventPriorities::PRE_WRITE]
         ];
     }
 
-    public function getAuthUser (ViewEvent $event)
+    public function setDataPublished (ViewEvent $event)
     {
         $entity = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 
-        $token = $this->storage->getToken();
-        if (null === $token) {
-            return;
-        }
 
         /** @var UserInterface $author */
-        $author = $this->storage->getToken()->getUser();
 
-       // dump($entity,$method,$author);die;
-        if ((!$entity instanceof AuthoredEntityInterface) || Request::METHOD_POST !== $method)
+
+        // dump($entity,$method,$author);die;
+        if ((!$entity instanceof PublishedDateEntityInterface) || Request::METHOD_POST !== $method)
         {return;}
-        $entity->setAuthor($author);
+        $entity->setPublished(new \DateTime());
 
-      //  dump($entity);exit();
+        //  dump($entity);exit();
 
     }
 }
