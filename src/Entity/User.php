@@ -66,7 +66,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     *  @Groups({"put","post"})
+     *  @Groups({"post"})
      * @Assert\NotBlank()
      * @Assert\Regex(
      *     pattern="/(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}/",
@@ -76,7 +76,7 @@ class User implements UserInterface
     private $password;
 
     /**
-     * @Groups({"put","post"})
+     * @Groups({"post"})
      * @Assert\NotBlank()
      * @Assert\Expression(
      *     "this.getPassword()=== this.getRetypePassword()",
