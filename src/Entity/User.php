@@ -62,6 +62,15 @@ use App\Controller\ResetPasswordAction;
  */
 class User implements UserInterface
 {
+
+    const ROLE_COMMENTATOR = 'ROLE_COMMENTATOR';
+    const ROLE_WRITER = 'ROLE_WRITER';
+    const ROLE_EDITOR = 'ROLE_EDITOR';
+    const ROLE_ADMIN = 'ROLE_ADMIN';
+    const ROLE_SUPERADMIN = 'ROLE_SUPERADMIN';
+
+    const DEFAULT_ROLES = [self::ROLE_COMMENTATOR];
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -120,12 +129,14 @@ class User implements UserInterface
      *     message="password did not match",
      *      groups={"put-reset-password"}
      *
-     * )     */
+     * )
+     */
     private $newretypePassword;
 
     /**
      * @Groups({"put-reset-password"})
-     * @UserPassword()
+     * @Assert\NotBlank(groups={"put-reset-password"})
+     * @UserPassword(groups={"put-reset-password"})
      */
     private $oldPassword;
 
@@ -162,10 +173,24 @@ class User implements UserInterface
      */
     private $passwordChangeDate;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $enabled;
+
+    /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    private $confirmationToken;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->posts = new ArrayCollection();
+        $this->enabled = false;
+        $this->confirmationToken = null;
+
+
     }
 
     public function getId(): ?int
@@ -381,6 +406,30 @@ class User implements UserInterface
     public function setPasswordChangeDate(?int $passwordChangeDate): self
     {
         $this->passwordChangeDate = $passwordChangeDate;
+
+        return $this;
+    }
+
+    public function getEnabled(): ?bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function getConfirmationToken()
+    {
+        return $this->confirmationToken;
+    }
+
+    public function setConfirmationToken(?string $confirmationToken): self
+    {
+        $this->confirmationToken = $confirmationToken;
 
         return $this;
     }
